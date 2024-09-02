@@ -1,9 +1,10 @@
 from dash.dependencies import Input, Output
-from dash import html
+from dash import html, dcc
 import pandas as pd
+import plotly.graph_objects as go
 
 
-def get_callbacks(app, model):
+def get_callbacks(app, model, df):
     @app.callback(
         Output('div-1', 'children'),
         [Input('slider-1', 'value'),
@@ -49,3 +50,19 @@ def get_callbacks(app, model):
             price = f'{price:,.2f} $'.replace(',', ' ')
 
             return html.H3(f'Przewidywana cena pojazdu to: {price}')
+
+
+
+    @app.callback(
+        Output('graph-1', 'children'),
+        [Input('drop-4', 'value')]
+    )
+    def update_graph(value):
+        graph_content = dcc.Graph(
+            figure=go.Figure(data=[
+                go.Box(y=df[df[value] == cat]['Price'],
+                       name=f'{cat}') for cat in df[value].unique()]
+            )
+        )
+
+        return graph_content
