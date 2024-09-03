@@ -23,10 +23,8 @@ def get_callbacks(app, model, df):
                     html.Div(f'Rodzaj skrzyni biegów: {val_6}') if val_6 is not None else None]
         return children
 
-
     fuel_map = {'Diesel': 'Fuel_Type_Diesel', 'Elektryczne': 'Fuel_Type_Electric', 'LPG': 'Fuel_Type_LPG',
                 'Benzyna': 'Fuel_Type_Petrol'}
-
 
     @app.callback(
         Output('div-2', 'children'),
@@ -38,10 +36,10 @@ def get_callbacks(app, model, df):
          Input('drop-3', 'value')]
     )
     def predict_value(val_1, val_2, val_3, val_4, val_5, val_6):
-        if val_1 and val_2 and val_3 and val_4 and val_5 and val_6:
+        if val_1 and val_2 and val_3 and val_4 and val_5:
             common_params = {'Year': val_1, 'Engine': val_2, 'Power': val_3, 'Seats': val_4}
             fuel_params = {val: 1 if key in val_5 else 0 for key, val in fuel_map.items()}
-            transmission_params = {'Transmission_Manual': 1 if val_6 == 'manual' else 0}
+            transmission_params = {'Transmission_Manual': 1 if val_6 == 'Manualna' else 0}
             full_params = {**common_params, **fuel_params, **transmission_params}
             df_sample = pd.DataFrame([full_params])
 
@@ -51,18 +49,61 @@ def get_callbacks(app, model, df):
 
             return html.H3(f'Przewidywana cena pojazdu to: {price}')
 
-
-
     @app.callback(
         Output('graph-1', 'children'),
         [Input('drop-4', 'value')]
     )
     def update_graph(value):
-        graph_content = dcc.Graph(
-            figure=go.Figure(data=[
-                go.Box(y=df[df[value] == cat]['Price'],
-                       name=f'{cat}') for cat in df[value].unique()]
+        if value == 'Power':
+            bins = range(0, 550, 50)
+            categories = pd.cut(df[value], bins=bins, right=False)
+            unique_categories = categories.cat.categories
+            graph_content = dcc.Graph(
+                figure=go.Figure(data=[
+                    go.Box(
+                        y=df[categories == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
+                        name=f'{cat.left} - {cat.right}'
+                    ) for cat in unique_categories],
+                    layout=go.Layout(
+                        title='Zależność cen pojazdów w zależności od mocy',
+                        xaxis_title=value,
+                        yaxis_title='Cena [w tysiącach $]'
+                    )
+                )
             )
-        )
+
+        elif value == 'Engine':
+            bins = range(0, 5500, 500)
+            categories = pd.cut(df[value], bins=bins, right=False)
+            unique_categories = categories.cat.categories
+            graph_content = dcc.Graph(
+                figure=go.Figure(data=[
+                    go.Box(
+                        y=df[categories == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
+                        name=f'{cat.left} - {cat.right}'
+                    ) for cat in unique_categories],
+                    layout=go.Layout(
+                        title='Zależność cen pojazdów w zależności od pojemności silnika',
+                        xaxis_title=value,
+                        yaxis_title='Cena [w tysiącach $]'
+                    )
+                )
+            )
+
+        else:
+            categories = sorted(df[value].unique())
+            graph_content = dcc.Graph(
+                figure=go.Figure(data=[
+                    go.Box(
+                        y=df[df[value] == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
+                        name=str(cat)
+                    ) for cat in categories],
+                    layout=go.Layout(
+                        title=f'Zależność cen pojazdów w zależności od {value}',
+                        xaxis_title=value,
+                        yaxis_title='Cena [w tysiącach $]'
+                    )
+                )
+            )
 
         return graph_content
