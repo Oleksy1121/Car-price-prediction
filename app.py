@@ -3,7 +3,6 @@ from dash import dcc, html
 import pandas as pd
 import pickle
 from callbacks import get_callbacks
-import plotly.graph_objects as go
 
 # Load the model
 with open('model/car_price_prediction.model', 'rb') as file:
@@ -103,19 +102,33 @@ app.layout = html.Div([
             label='Wykresy zależności cen pojazdów',
             children=[
                 html.Div([
-                    dcc.Dropdown(id='drop-4',
-                                 options=[{'label': 'Rok Produkcji', 'value': 'Year'},
-                                          {'label': 'Pojemność silnika', 'value': 'Engine'},
-                                          {'label': 'Moc silnika', 'value': 'Power'},
-                                          {'label': 'Ilość miejsc', 'value': 'Seats'}],
-                                 value='Year',
-                                 style={'width': '50%', 'margin': '0 auto', 'padding': '10px'})
-                ], style={'textAlign': 'center', 'padding': '20px'}),
+                    html.Div([
+                        dcc.Dropdown(id='drop-4',
+                                     options=[{'label': 'Rok Produkcji', 'value': 'Year'},
+                                              {'label': 'Pojemność silnika', 'value': 'Engine'},
+                                              {'label': 'Moc silnika', 'value': 'Power'},
+                                              {'label': 'Ilość miejsc', 'value': 'Seats'}],
+                                     value='Year',
+                                     style={'width': '50%', 'margin': '0 auto', 'padding': '10px'})
+                    ],
+                        style={'textAlign': 'center', 'padding': '20px'}),
 
-                html.Div(id='graph-1', style={'padding': '20px'})
-            ],
-            style={'backgroundColor': '#F8F9FA', 'padding': '20px', 'borderRadius': '10px',
-                   'boxShadow': '0 4px 8px rgba(0, 0, 0, 0.1)'}
+                    html.Div(
+                        id='graph-1',
+                        style={
+                            'display': 'flex',
+                            'justify-content': 'space-between',
+                        }
+                    )
+                ],
+                style={
+                    'width': '80%',
+                    'margin': 'auto',
+                    'background-color': '#F8F9FA'
+                }
+                )
+            ]
+
         )
     ])
 ])

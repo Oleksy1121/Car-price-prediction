@@ -2,7 +2,7 @@ from dash.dependencies import Input, Output
 from dash import html, dcc
 import pandas as pd
 import plotly.graph_objects as go
-
+import plotly.colors as pcolors
 
 def get_callbacks(app, model, df):
     @app.callback(
@@ -58,52 +58,159 @@ def get_callbacks(app, model, df):
             bins = range(0, 550, 50)
             categories = pd.cut(df[value], bins=bins, right=False)
             unique_categories = categories.cat.categories
-            graph_content = dcc.Graph(
-                figure=go.Figure(data=[
-                    go.Box(
-                        y=df[categories == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
-                        name=f'{cat.left} - {cat.right}'
-                    ) for cat in unique_categories],
-                    layout=go.Layout(
-                        title='Zależność cen pojazdów w zależności od mocy',
-                        xaxis_title=value,
-                        yaxis_title='Cena [w tysiącach $]'
+
+            graph_content = [
+                dcc.Graph(
+                    figure=go.Figure(
+                        data=[
+                            go.Box(
+                                y=df[categories == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
+                                name=f'{cat.left} - {cat.right}'
+                            ) for cat in unique_categories
+                        ],
+                        layout=go.Layout(
+                            title='Zależność cen pojazdów w zależności od mocy',
+                            xaxis_title=value,
+                            yaxis_title='Cena [w tysiącach $]',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)'
+                        )
                     )
+                ),
+
+                dcc.Graph(
+                    figure=go.Figure(
+                        data=[
+                            go.Pie(
+                                labels=[f'{cat.left} - {cat.right}' for cat in unique_categories],
+                                values=[df[categories == cat]['Price'].count() for cat in unique_categories],
+                                sort=False,
+                                text=[f'{(df[categories == cat]["Price"].count() / df["Price"].count() * 100):.1f}%'
+                                      if (df[categories == cat]['Price'].count() / df['Price'].count()) > 0.01
+                                      else ''
+                                      for cat in unique_categories],
+                                textinfo='text'
+                            )
+                        ],
+                        layout=go.Layout(
+                            title=f'Rozkład mocy pojazdów',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)'
+                        )
+                    ),
+                    style={
+                        'width': '25%',
+                    }
                 )
-            )
+            ]
+
+
 
         elif value == 'Engine':
             bins = range(0, 5500, 500)
             categories = pd.cut(df[value], bins=bins, right=False)
             unique_categories = categories.cat.categories
-            graph_content = dcc.Graph(
-                figure=go.Figure(data=[
-                    go.Box(
-                        y=df[categories == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
-                        name=f'{cat.left} - {cat.right}'
-                    ) for cat in unique_categories],
-                    layout=go.Layout(
-                        title='Zależność cen pojazdów w zależności od pojemności silnika',
-                        xaxis_title=value,
-                        yaxis_title='Cena [w tysiącach $]'
-                    )
+
+            graph_content = [
+                dcc.Graph(
+                    figure=go.Figure(
+                        data=[
+                            go.Box(
+                                y=df[categories == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
+                                name=f'{cat.left} - {cat.right}'
+                            ) for cat in unique_categories
+                        ],
+                        layout=go.Layout(
+                            title='Zależność cen pojazdów w zależności od pojemności silnika',
+                            xaxis_title=value,
+                            yaxis_title='Cena [w tysiącach $]',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)'
+                        )
+                    ),
+                    style={
+                        'width': '75%',
+                    }
+                ),
+
+                dcc.Graph(
+                    figure=go.Figure(
+                        data=[
+                            go.Pie(
+                                labels=[f'{cat.left} - {cat.right}' for cat in unique_categories],
+                                values=[df[categories == cat]['Price'].count() for cat in unique_categories],
+                                sort=False,
+                                text=[f'{(df[categories == cat]["Price"].count() / df["Price"].count() * 100):.1f}%'
+                                      if (df[categories == cat]['Price'].count() / df['Price'].count()) > 0.01
+                                      else ''
+                                      for cat in unique_categories],
+                                textinfo='text'
+                            )
+                        ],
+                        layout=go.Layout(
+                            title=f'Rozkład pojemności silnika',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)'
+                        )
+                    ),
+                    style={
+                        'width': '25%',
+                    }
                 )
-            )
+            ]
 
         else:
             categories = sorted(df[value].unique())
-            graph_content = dcc.Graph(
-                figure=go.Figure(data=[
-                    go.Box(
-                        y=df[df[value] == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
-                        name=str(cat)
-                    ) for cat in categories],
-                    layout=go.Layout(
-                        title=f'Zależność cen pojazdów w zależności od {value}',
-                        xaxis_title=value,
-                        yaxis_title='Cena [w tysiącach $]'
-                    )
+            colors = pcolors.qualitative.Plotly
+
+            graph_content = [
+                dcc.Graph(
+                    figure=go.Figure(
+                        data=[
+                            go.Box(
+                                y=df[df[value] == cat]['Price'] * 1000,  # Przemnożenie wartości 'Price' przez 1000
+                                name=str(cat),
+                                marker_color=colors[i % len(colors)]
+                            ) for i, cat in enumerate(categories)
+                        ],
+                        layout=go.Layout(
+                            title=f'Zależność cen pojazdów w zależności od {value}',
+                            xaxis_title=value,
+                            yaxis_title='Cena [w tysiącach $]',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)'
+                        )
+                    ),
+                    style={
+                        'width': '75%'
+                    }
+                ),
+
+                dcc.Graph(
+                    figure=go.Figure(
+                        data=[
+                            go.Pie(
+                                labels=categories,
+                                values=[df[df[value] == cat]['Price'].count() for cat in categories],
+                                sort=False,
+                                text=[f'{(df[df[value] == cat]["Price"].count() / df["Price"].count() * 100):.1f}%'
+                                      if (df[df[value] == cat]['Price'].count() / df['Price'].count()) > 0.01
+                                      else ''
+                                      for cat in categories],
+                                textinfo='text'
+
+                            )
+                        ],
+                        layout=go.Layout(
+                            title=f'Rozkład kolumny "{value}"',
+                            paper_bgcolor='rgba(0,0,0,0)',
+                            plot_bgcolor='rgba(0,0,0,0)'
+                        )
+                    ),
+                    style={
+                        'width': '25%',
+                    }
                 )
-            )
+            ]
 
         return graph_content
