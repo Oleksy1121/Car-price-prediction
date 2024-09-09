@@ -33,6 +33,7 @@ app.layout = html.Div([
                 dcc.Slider(id='slider-1',
                            min=df.Year.min(),
                            max=df.Year.max(),
+                           value=2000,
                            step=1,
                            marks={i: str(i) for i in range(df.Year.min(), df.Year.max() + 1)},
                            tooltip={'placement': 'bottom', 'always_visible': True}),
@@ -44,6 +45,7 @@ app.layout = html.Div([
                 dcc.Slider(id='slider-2',
                            min=df.Engine.min(),
                            max=df.Engine.max(),
+                           value=1272,
                            marks={i: str(i) for i in range(int(df.Engine.min()), int(df.Engine.max()) + 1, 300)},
                            tooltip={'placement': 'bottom', 'always_visible': True}),
 
@@ -54,6 +56,7 @@ app.layout = html.Div([
                 dcc.Slider(id='slider-3',
                            min=df.Power.min(),
                            max=df.Power.max(),
+                           value=94,
                            marks={i: str(i) for i in range(int(df.Power.min()), int(df.Power.max()) + 1, 30)},
                            tooltip={'placement': 'bottom', 'always_visible': True}),
 
@@ -66,7 +69,8 @@ app.layout = html.Div([
                         html.Label('Podaj liczbę pasażerów', style={'fontWeight': 'bold'}),
                         dcc.Dropdown(id='drop-1',
                                      options=[{'label': p, 'value': p} for p in sorted(df.Seats.unique())],
-                                     placeholder='Wybierz...')
+                                     value=5,
+                                     placeholder='Wybierz liczbę pasażerów')
                     ], style={'width': '25%', 'padding': '0 10px'}),
 
                     html.Div([
@@ -74,14 +78,16 @@ app.layout = html.Div([
                         dcc.Dropdown(id='drop-2',
                                      options=[{'label': fuel, 'value': fuel} for fuel in
                                               ['Diesel', 'Benzyna', 'CNG', 'LPG', 'Elektryczne']],
-                                     placeholder='Wybierz...')
+                                     value='Benzyna',
+                                     placeholder='Wybierz typ paliwa')
                     ], style={'width': '25%', 'padding': '0 10px'}),
 
                     html.Div([
                         html.Label('Podaj typ przekładni', style={'fontWeight': 'bold'}),
                         dcc.Dropdown(id='drop-3',
-                                     options=[{'label': trans, 'value': trans} for trans in ['Manualna', 'Automatyczna']],
-                                     placeholder='Wybierz...')
+                                     options=[{'label': t, 'value': t} for t in ['Manualna', 'Automatyczna']],
+                                     value='Automatyczna',
+                                     placeholder='Wybierz wyp przekładni')
                     ], style={'width': '25%', 'padding': '0 10px'})
                 ], style={'display': 'flex', 'justify-content': 'space-between'}),
 
@@ -120,17 +126,18 @@ app.layout = html.Div([
                             'justify-content': 'space-between',
                         }
                     )
-                ],
-                style={
-                    'width': '80%',
-                    'margin': 'auto',
-                    'background-color': '#F8F9FA'
-                }
+                ]
                 )
             ]
 
         )
-    ])
+    ],
+        style={
+            'width': '80%',
+            'margin': 'auto',
+            'background-color': '#F8F9FA'
+        }
+    )
 ])
 
 # callbacks
